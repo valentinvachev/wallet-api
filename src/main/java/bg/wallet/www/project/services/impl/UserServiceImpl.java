@@ -1,6 +1,7 @@
 package bg.wallet.www.project.services.impl;
 
 import bg.wallet.www.project.enums.UserRole;
+import bg.wallet.www.project.exceptions.DuplicateEntityException;
 import bg.wallet.www.project.models.Role;
 import bg.wallet.www.project.models.User;
 import bg.wallet.www.project.models.binding.UserRegisterBindingModel;
@@ -32,8 +33,12 @@ public class UserServiceImpl implements UserService {
         this.modelMapper = modelMapper;
     }
 
-    public void save(UserRegisterBindingModel userRegisterBindingModel) {
-        //TODO check if such an email already exists
+    public void save(UserRegisterBindingModel userRegisterBindingModel) throws DuplicateEntityException {
+        User userDb = this.findByEmail(userRegisterBindingModel.getEmail());
+
+        if (userDb != null) {
+            throw new DuplicateEntityException("User with such email already exists");
+        }
 
         Role role = null;
 

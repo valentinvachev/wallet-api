@@ -4,6 +4,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 
 @Entity
@@ -11,6 +12,7 @@ import java.math.BigDecimal;
 public class Wallet extends BaseEntity {
 
     @Column(nullable = false)
+    @Size(min = 2,message = "Name should be at least 2 symbols")
     private String name;
     @Column(nullable = false)
     private BigDecimal balance;

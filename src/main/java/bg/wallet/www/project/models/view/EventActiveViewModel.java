@@ -1,25 +1,26 @@
-package bg.wallet.www.project.models;
-
-import javax.persistence.*;
+package bg.wallet.www.project.models.view;
 import java.time.LocalDate;
 
-
-@Entity
-@Table(name = "events")
-public class Event extends BaseEntity {
-
-    @Column(nullable = false)
+public class EventActiveViewModel {
+    private Long id;
     private String name;
-    @Column(name = "start_date")
     private LocalDate startDate;
-    @Column(name = "end_date")
     private LocalDate endDate;
+
+    public Long getId() {
+        return id;
+    }
+
+    public EventActiveViewModel setId(Long id) {
+        this.id = id;
+        return this;
+    }
 
     public String getName() {
         return name;
     }
 
-    public Event setName(String name) {
+    public EventActiveViewModel setName(String name) {
         this.name = name;
         return this;
     }
@@ -28,7 +29,7 @@ public class Event extends BaseEntity {
         return startDate;
     }
 
-    public Event setStartDate(LocalDate startDate) {
+    public EventActiveViewModel setStartDate(LocalDate startDate) {
         this.startDate = startDate;
         return this;
     }
@@ -37,7 +38,7 @@ public class Event extends BaseEntity {
         return endDate;
     }
 
-    public Event setEndDate(LocalDate endDate) {
+    public EventActiveViewModel setEndDate(LocalDate endDate) {
         this.endDate = endDate;
         return this;
     }

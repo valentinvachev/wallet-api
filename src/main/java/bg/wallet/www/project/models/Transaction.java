@@ -3,6 +3,10 @@ package bg.wallet.www.project.models;
 import bg.wallet.www.project.enums.TransactionType;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 
 @Entity
@@ -10,21 +14,27 @@ import javax.persistence.*;
 public class Transaction extends BaseEntity {
 
     @Column(nullable = false)
+    @Size(min = 2,message = "Name should be at least 2 symbols")
     private String name;
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TransactionType type;
+    private BigDecimal amount;
     @ManyToOne
     private Event event;
     @ManyToOne
     private Category category;
+    @ManyToOne
+    private Wallet wallet;
+    @ManyToOne
+    private User user;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-    public Category getCategory() {
-        return category;
+    public User getUser() {
+        return user;
     }
 
-    public Transaction setCategory(Category category) {
-        this.category = category;
+    public Transaction setUser(User user) {
+        this.user = user;
         return this;
     }
 
@@ -37,12 +47,12 @@ public class Transaction extends BaseEntity {
         return this;
     }
 
-    public TransactionType getType() {
-        return type;
+    public BigDecimal getAmount() {
+        return amount;
     }
 
-    public Transaction setType(TransactionType type) {
-        this.type = type;
+    public Transaction setAmount(BigDecimal amount) {
+        this.amount = amount;
         return this;
     }
 
@@ -52,6 +62,33 @@ public class Transaction extends BaseEntity {
 
     public Transaction setEvent(Event event) {
         this.event = event;
+        return this;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public Transaction setCategory(Category category) {
+        this.category = category;
+        return this;
+    }
+
+    public Wallet getWallet() {
+        return wallet;
+    }
+
+    public Transaction setWallet(Wallet wallet) {
+        this.wallet = wallet;
+        return this;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public Transaction setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
         return this;
     }
 }

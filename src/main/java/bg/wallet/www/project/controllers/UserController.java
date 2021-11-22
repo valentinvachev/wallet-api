@@ -1,5 +1,6 @@
 package bg.wallet.www.project.controllers;
 
+import bg.wallet.www.project.exceptions.DuplicateEntityException;
 import bg.wallet.www.project.models.Role;
 import bg.wallet.www.project.models.User;
 import bg.wallet.www.project.models.binding.UserRegisterBindingModel;
@@ -29,6 +30,7 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/users")
 public class UserController {
 
@@ -41,10 +43,10 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(HttpServletRequest request,
-                                               @Valid @RequestBody UserRegisterBindingModel userRegisterBindingModel) throws URISyntaxException {
+                                               @Valid @RequestBody UserRegisterBindingModel userRegisterBindingModel) throws URISyntaxException, DuplicateEntityException {
 
         Map<String,String> bodyResponse = new HashMap<>();
-        //TODO handle errors
+
         this.userService.save(userRegisterBindingModel);
 
         bodyResponse.put("created",userRegisterBindingModel.getEmail());

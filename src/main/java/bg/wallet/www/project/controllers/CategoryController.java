@@ -1,5 +1,6 @@
 package bg.wallet.www.project.controllers;
 
+import bg.wallet.www.project.exceptions.DuplicateEntityException;
 import bg.wallet.www.project.models.Category;
 import bg.wallet.www.project.models.binding.CategoryBindingModel;
 import bg.wallet.www.project.services.CategoryService;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/categories")
 public class CategoryController {
 
@@ -27,25 +29,23 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<String> getCategory(@PathVariable Long id) {
-        return ResponseEntity.ok().body("Welcome to out site");
-    }
-
     @PostMapping("")
-    public ResponseEntity<?> createCategory(HttpServletRequest request, @Valid @RequestBody CategoryBindingModel categoryBindingModel) throws URISyntaxException {
+    public ResponseEntity<?> createCategory(HttpServletRequest request, @Valid @RequestBody CategoryBindingModel categoryBindingModel) throws URISyntaxException, DuplicateEntityException {
 
         Map<String,String> bodyResponse = new HashMap<>();
-        //TODO handle errors
-        this.categoryService.save(categoryBindingModel);
 
-        bodyResponse.put("created",categoryBindingModel.getName());
+        bodyResponse.put("created",String.valueOf( this.categoryService.save(categoryBindingModel)));
 
         return ResponseEntity.created(new URI(request.getServletPath())).body(bodyResponse);
     }
 
     @GetMapping("")
-    public List<Category> findSpecificCategory(@RequestParam(required = false) String name) {
-        return categoryService.findAll(name);
+    public ResponseEntity<?> getCategories (@RequestParam(required = false) String name) {
+        return ResponseEntity.ok().body(this.categoryService.findAll());
     }
+
+//    @GetMapping("")
+//    public List<Category> findSpecificCategory(@RequestParam(required = false) String name) {
+//        return categoryService.findAll(name);
+//    }
 }
