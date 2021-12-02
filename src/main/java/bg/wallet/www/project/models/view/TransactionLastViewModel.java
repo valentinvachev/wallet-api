@@ -9,7 +9,7 @@ public class TransactionLastViewModel {
     private String category;
     private String categoryType;
     private String wallet;
-    private LocalDateTime createdAt;
+    private String createdAt;
 
     public Long getId() {
         return id;
@@ -65,11 +65,11 @@ public class TransactionLastViewModel {
         return this;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public String getCreatedAt() {
         return createdAt;
     }
 
-    public TransactionLastViewModel setCreatedAt(LocalDateTime createdAt) {
+    public TransactionLastViewModel setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
         return this;
     }

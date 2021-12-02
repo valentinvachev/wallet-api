@@ -44,7 +44,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.cors().configurationSource(request -> {
             var cors = new CorsConfiguration();
             cors.setAllowedOrigins(List.of("*"));
-            cors.setAllowedMethods(List.of("GET","POST", "PUT", "DELETE", "OPTIONS"));
+            cors.setAllowedMethods(List.of("GET","POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
             cors.setAllowedHeaders(List.of("*"));
             return cors;
         });
@@ -52,12 +52,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.authorizeRequests()
                 .antMatchers("/login","/api/users/token/refreshToken","/api/users/register").permitAll();
-//        http.authorizeRequests().antMatchers(HttpMethod.GET,"/api/categories/**").hasAnyAuthority("ADMIN");
-//        http.authorizeRequests().antMatchers(HttpMethod.POST,"/api/categories/**").hasAnyAuthority("ADMIN");
-//        http.authorizeRequests().anyRequest().authenticated();
-        http.authorizeRequests().anyRequest().permitAll();
+        http.authorizeRequests().antMatchers(HttpMethod.PATCH,"/api/users/**").hasAnyAuthority("ADMIN");
+        http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(new CustomAuthenticationFilter(authenticationManagerBean()));
-//        http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Bean

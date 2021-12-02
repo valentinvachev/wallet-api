@@ -5,6 +5,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -26,7 +27,9 @@ public class User extends BaseEntity {
     private Set<Role> authorities = new HashSet<>();
 
     public Set<Role> getAuthorities() {
-        return authorities;
+        return authorities
+                .stream()
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     public User setAuthorities(Set<Role> authorities) {

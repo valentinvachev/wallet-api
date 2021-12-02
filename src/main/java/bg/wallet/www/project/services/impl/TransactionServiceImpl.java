@@ -67,7 +67,11 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction transaction = this.modelMapper.map(transactionServiceModel,Transaction.class);
 
-        return this.transactionRepository.save(transaction).getId();
+        Long id = this.transactionRepository.save(transaction).getId();
+
+        this.walletService.editBalance(wallet.getId(),transactionBindingModel.getAmount(),category.getType());
+
+        return id;
     }
 
     @Override
@@ -85,5 +89,15 @@ public class TransactionServiceImpl implements TransactionService {
                             .setWallet(t.getWallet().getName());
                     return lastViewModel;
                 }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Transaction> findAllTransactionsByWallet(Long walletId) {
+        return this.transactionRepository.findAllByWallet_IdOrderByCreatedAtDesc(walletId);
+    }
+
+    @Override
+    public List<Transaction> findAllTransactionsBetweenDatesByWallet(Long walletId, LocalDateTime startDate, LocalDateTime endDate) {
+        return this.transactionRepository.findTransactionByWallet_IdAndCreatedAtGreaterThanEqualAndCreatedAtLessThanEqualOrderByCreatedAtDesc(walletId,startDate,endDate);
     }
 }

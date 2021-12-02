@@ -20,11 +20,10 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin
 @RequestMapping("/api/transactions")
 public class TransactionController {
 
-    private TransactionService transactionService;
+    private final TransactionService transactionService;
 
     @Autowired
     public TransactionController(TransactionService transactionService) {
@@ -38,6 +37,7 @@ public class TransactionController {
 
         //TODO add real user email from token
         bodyResponse.put("created",String.valueOf(this.transactionService.save(transactionBindingModel,"admin@abv.bg")));
+
 
         return ResponseEntity.created(new URI(request.getServletPath())).body(bodyResponse);
     }

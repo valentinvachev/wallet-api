@@ -1,5 +1,6 @@
 package bg.wallet.www.project.services.impl;
 
+import bg.wallet.www.project.exceptions.DuplicateEntityException;
 import bg.wallet.www.project.exceptions.InvalidInputException;
 import bg.wallet.www.project.models.Event;
 import bg.wallet.www.project.models.binding.EventsBindingModel;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,7 +31,22 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Long save(EventsBindingModel eventsBindingModel) throws InvalidInputException {
+    public List<EventActiveViewModel> findActiveEvents() {
+        List<Event> events = this.eventRepository.findEventByEndDateGreaterThanEqual(LocalDate.now());
+
+        return events.stream()
+                .map(e->this.modelMapper.map(e, EventActiveViewModel.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Long save(EventsBindingModel eventsBindingModel) throws InvalidInputException, DuplicateEntityException {
+
+        Event eventDb = this.findByName(eventsBindingModel.getName());
+
+        if (eventDb != null) {
+            throw new DuplicateEntityException("Event with this name already exists");
+        }
 
         if (eventsBindingModel.getStartDate().isAfter(eventsBindingModel.getStartDate())) {
             throw new InvalidInputException("Start date should not be after end date");
@@ -47,6 +64,11 @@ public class EventServiceImpl implements EventService {
         return events.stream()
                 .map(e->this.modelMapper.map(e, EventActiveViewModel.class))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Event findByName(String name) {
+        return this.eventRepository.findByName(name).orElse(null);
     }
 
     @Override

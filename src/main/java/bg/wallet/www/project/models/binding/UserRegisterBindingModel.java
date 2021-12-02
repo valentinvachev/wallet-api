@@ -17,14 +17,6 @@ public class UserRegisterBindingModel {
     @NotNull
     private String email;
 
-    public UserRegisterBindingModel(String username, String password, String confirmPassword, String email) {
-        this.username = username;
-        this.password = password;
-        this.confirmPassword = confirmPassword;
-        this.email = email;
-    }
-
-
     public String getUsername() {
         return username;
     }

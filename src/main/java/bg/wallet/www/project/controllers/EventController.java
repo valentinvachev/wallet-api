@@ -1,5 +1,6 @@
 package bg.wallet.www.project.controllers;
 
+import bg.wallet.www.project.exceptions.DuplicateEntityException;
 import bg.wallet.www.project.exceptions.InvalidInputException;
 import bg.wallet.www.project.models.binding.EventsBindingModel;
 import bg.wallet.www.project.services.EventService;
@@ -15,7 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@CrossOrigin
 @RequestMapping("/api/events")
 public class EventController {
 
@@ -27,7 +27,7 @@ public class EventController {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> createEvent(HttpServletRequest request, @Valid @RequestBody EventsBindingModel eventsBindingModel) throws URISyntaxException, InvalidInputException {
+    public ResponseEntity<?> createEvent(HttpServletRequest request, @Valid @RequestBody EventsBindingModel eventsBindingModel) throws URISyntaxException, InvalidInputException, DuplicateEntityException {
         Map<String,String> bodyResponse = new HashMap<>();
 
         bodyResponse.put("created",String.valueOf(this.eventService.save(eventsBindingModel)));
@@ -36,8 +36,12 @@ public class EventController {
     }
 
     @GetMapping("")
-    public ResponseEntity<?> getEvents(HttpServletRequest request){
+    public ResponseEntity<?> getEvents(HttpServletRequest request, @RequestParam(required = false) String active){
         Map<String,String> bodyResponse = new HashMap<>();
+
+        if (active.equals("true")) {
+            return ResponseEntity.ok().body(this.eventService.findActiveEvents());
+        }
 
         return ResponseEntity.ok().body(this.eventService.findAll());
     }

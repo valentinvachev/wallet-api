@@ -1,6 +1,7 @@
 package bg.wallet.www.project.controllers;
 
 import bg.wallet.www.project.exceptions.DuplicateEntityException;
+import bg.wallet.www.project.exceptions.EntityNotFoundException;
 import bg.wallet.www.project.models.Role;
 import bg.wallet.www.project.models.User;
 import bg.wallet.www.project.models.binding.UserRegisterBindingModel;
@@ -30,7 +31,6 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
-@CrossOrigin
 @RequestMapping("/api/users")
 public class UserController {
 
@@ -52,6 +52,33 @@ public class UserController {
         bodyResponse.put("created",userRegisterBindingModel.getEmail());
 
         return ResponseEntity.created(new URI(request.getServletPath())).body(bodyResponse);
+    }
+
+    @GetMapping("")
+    public ResponseEntity<?> getUsers(HttpServletRequest request) throws URISyntaxException, DuplicateEntityException {
+            return ResponseEntity.ok().body(this.userService.findAllUsers());
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<?> getUserInfo(HttpServletRequest request) throws URISyntaxException, DuplicateEntityException, EntityNotFoundException {
+
+            return ResponseEntity.ok().body(this.userService.findUserInfoByEmail(request.getUserPrincipal().getName()));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> updateUser(HttpServletRequest request, @PathVariable Long id, @RequestParam(required = false) String admin) throws EntityNotFoundException {
+
+        Map<String,Long> bodyResponse = new HashMap<>();
+
+        if (admin.equals("true")) {
+             this.userService.changeUserRoles(id,true);
+        } else {
+            this.userService.changeUserRoles(id,false);
+        }
+
+        bodyResponse.put("updated",id);
+
+        return ResponseEntity.ok().body(bodyResponse);
     }
 
     @PostMapping("/token/refreshToken")

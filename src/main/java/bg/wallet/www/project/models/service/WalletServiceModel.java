@@ -1,7 +1,7 @@
 package bg.wallet.www.project.models.service;
 import java.math.BigDecimal;
 
-public class WalletServiceModal {
+public class WalletServiceModel {
 
     private String name;
     private BigDecimal balance;
@@ -10,7 +10,7 @@ public class WalletServiceModal {
         return name;
     }
 
-    public WalletServiceModal setName(String name) {
+    public WalletServiceModel setName(String name) {
         this.name = name;
         return this;
     }
@@ -19,7 +19,7 @@ public class WalletServiceModal {
         return balance;
     }
 
-    public WalletServiceModal setBalance(BigDecimal balance) {
+    public WalletServiceModel setBalance(BigDecimal balance) {
         this.balance = balance;
         return this;
     }

@@ -4,8 +4,8 @@ import java.time.LocalDate;
 public class EventActiveViewModel {
     private Long id;
     private String name;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private String startDate;
+    private String endDate;
 
     public Long getId() {
         return id;
@@ -25,20 +25,20 @@ public class EventActiveViewModel {
         return this;
     }
 
-    public LocalDate getStartDate() {
+    public String getStartDate() {
         return startDate;
     }
 
-    public EventActiveViewModel setStartDate(LocalDate startDate) {
+    public EventActiveViewModel setStartDate(String startDate) {
         this.startDate = startDate;
         return this;
     }
 
-    public LocalDate getEndDate() {
+    public String getEndDate() {
         return endDate;
     }
 
-    public EventActiveViewModel setEndDate(LocalDate endDate) {
+    public EventActiveViewModel setEndDate(String endDate) {
         this.endDate = endDate;
         return this;
     }
