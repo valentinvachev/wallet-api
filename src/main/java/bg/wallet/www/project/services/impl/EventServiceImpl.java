@@ -48,7 +48,7 @@ public class EventServiceImpl implements EventService {
             throw new DuplicateEntityException("Event with this name already exists");
         }
 
-        if (eventsBindingModel.getStartDate().isAfter(eventsBindingModel.getStartDate())) {
+        if (eventsBindingModel.getStartDate().isAfter(eventsBindingModel.getEndDate())) {
             throw new InvalidInputException("Start date should not be after end date");
         }
 

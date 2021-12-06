@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void changeUserRoles(Long id,Boolean isAdmin) throws EntityNotFoundException {
-        User userDb = this.userRepository.findById(id).orElse(null);
+        User userDb = this.userRepository.getById(id);
 
         if (userDb == null) {
             throw new EntityNotFoundException("User does not exist");

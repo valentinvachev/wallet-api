@@ -64,7 +64,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category findById(Long id) {
-        return this.categoryRepository.findById(id).orElse(null);
+        return this.categoryRepository.getById(id);
     }
 
     @Override
@@ -75,7 +75,8 @@ public class CategoryServiceImpl implements CategoryService {
             CategoryServiceModel categoryServiceModel = this.modelMapper.map(categoryBindingModel,CategoryServiceModel.class);
             Category category = this.modelMapper.map(categoryServiceModel,Category.class);
 
-            return this.categoryRepository.save(category).getId();
+            Category categorySaved = this.categoryRepository.save(category);
+            return categorySaved.getId();
         } else {
             throw new DuplicateEntityException("Category already exists");
         }
@@ -84,7 +85,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Long editName(Long id, CategoryEditBindingModel categoryEditBindingModel, String userEmail) throws InvalidInputException, EntityNotFoundException {
-        Category categoryDb = this.categoryRepository.findById(id).orElse(null);
+        Category categoryDb = this.categoryRepository.getById(id);
         User user = this.userService.findByEmail(userEmail);
 
         if (user == null) {
@@ -103,6 +104,6 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<Map<String, String>> findAllAmount() {
         List<Map<String, String>> result  = this.categoryRepository.findAmountsByCategories();
-        return  result;
+        return result;
     }
 }

@@ -15,4 +15,5 @@ public interface CategoryRepository extends JpaRepository<Category,Long>, JpaSpe
     Category findByName(String name);
     @Query("SELECT c.name AS name,SUM(t.amount) as total, c.type as type FROM Transaction t JOIN Category c on c.id = t.category.id GROUP BY c.id ORDER BY c.type, SUM(t.amount) DESC")
     List<Map<String,String>> findAmountsByCategories();
+    Category getById(Long id);
 }

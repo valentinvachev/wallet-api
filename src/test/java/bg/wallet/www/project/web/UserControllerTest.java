@@ -12,6 +12,7 @@ import bg.wallet.www.project.repositories.UserRepository;
 import bg.wallet.www.project.services.CategoryService;
 import bg.wallet.www.project.services.impl.CategoryServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +20,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import static bg.wallet.www.project.web.Utils.asJsonString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -38,12 +45,12 @@ public class UserControllerTest {
     private RoleRepository roleRepository;
 
     private String TEST_USER1_USERNAME = "admin";
-    private String TEST_USER1_EMAIL = "admin@abv.bg";
+    private String TEST_USER1_EMAIL = "testuser@abv.bg";
     private String TEST_USER1_PASS = "parola123";
 
 
     @Test
-    @WithMockUser(username = "admin@abv.bg",roles = {"USER","ADMIN"})
+    @WithMockUser(username = "test@abv.bg",roles = {"USER","ADMIN"})
     public void createUserValid() throws Exception {
 
         UserRegisterBindingModel userRegisterBindingModel = new UserRegisterBindingModel()
@@ -58,7 +65,7 @@ public class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "admin@abv.bg",roles = {"USER","ADMIN"})
+    @WithMockUser(username = "test@abv.bg",roles = {"USER","ADMIN"})
     public void createUserInvalidUsername() throws Exception {
 
         UserRegisterBindingModel userRegisterBindingModel = new UserRegisterBindingModel()
@@ -70,13 +77,5 @@ public class UserControllerTest {
         this.mockMvc.perform(post("/api/users/register").content(asJsonString(userRegisterBindingModel))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
-    }
-
-    public static String asJsonString(final Object obj) {
-        try {
-            return new ObjectMapper().writeValueAsString(obj);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 }

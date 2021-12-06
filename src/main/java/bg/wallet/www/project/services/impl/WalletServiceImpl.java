@@ -65,7 +65,7 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public void editBalance(Long walletId, BigDecimal amount, TransactionType type) {
-        Wallet wallet = this.walletRepository.findById(walletId).orElse(null);
+        Wallet wallet = this.walletRepository.getById(walletId);
 
         if (wallet != null) {
             BigDecimal currentBalance = wallet.getBalance();
@@ -82,7 +82,7 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public Long editName(Long id, WalletEditBindingModel walletEditBindingModel, String userEmail) throws InvalidInputException, EntityNotFoundException {
-        Wallet walletDb = this.walletRepository.findById(id).orElse(null);
+        Wallet walletDb = this.walletRepository.getById(id);
         User user = this.userService.findByEmail(userEmail);
 
         if (user == null) {
@@ -107,13 +107,13 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public Wallet findById(Long id) {
-        return this.walletRepository.findById(id).orElse(null);
+        return this.walletRepository.getById(id);
     }
 
     @Override
     public WalletDetailsViewModel getWalletById(Long id) throws EntityNotFoundException {
 
-        Wallet wallet = this.walletRepository.findById(id).orElse(null);
+        Wallet wallet = this.walletRepository.getById(id);
 
         if (wallet == null) {
             throw new EntityNotFoundException("Wallet with this id does not exists");
@@ -133,7 +133,7 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public WalletDetailsReportViewModel getWalletReportById(Long id, LocalDateTime startDate, LocalDateTime endDate) throws InvalidInputException, EntityNotFoundException {
-        Wallet wallet = this.walletRepository.findById(id).orElse(null);
+        Wallet wallet = this.walletRepository.getById(id);
 
         if (wallet == null) {
             throw new EntityNotFoundException("Wallet with this id does not exists");

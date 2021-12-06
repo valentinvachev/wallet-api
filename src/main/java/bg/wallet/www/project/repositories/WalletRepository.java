@@ -13,4 +13,5 @@ public interface WalletRepository extends JpaRepository<Wallet,Long> {
     Wallet findByName(String name);
     @Query("SELECT SUM(w.balance) FROM Wallet w")
     BigDecimal findSumOfAllWallets();
+    Wallet getById(Long id);
 }

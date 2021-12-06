@@ -34,10 +34,10 @@ public class WalletController {
 
         Map<String,String> bodyResponse = new HashMap<>();
 
-        //TODO replace with user from token
+        String userEmail = request.getUserPrincipal().getName();
 
-        bodyResponse.put("created",String.valueOf(this.walletService.save(walletBindingModel,"admin@abv.bg")));
-        bodyResponse.put("user","admin@abv.bg");
+        bodyResponse.put("created",String.valueOf(this.walletService.save(walletBindingModel,userEmail)));
+        bodyResponse.put("user",userEmail);
 
         return ResponseEntity.created(new URI(request.getServletPath())).body(bodyResponse);
     }

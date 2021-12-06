@@ -39,7 +39,7 @@ public class EventController {
     public ResponseEntity<?> getEvents(HttpServletRequest request, @RequestParam(required = false) String active){
         Map<String,String> bodyResponse = new HashMap<>();
 
-        if (active.equals("true")) {
+        if ("true".equals(active)) {
             return ResponseEntity.ok().body(this.eventService.findActiveEvents());
         }
 

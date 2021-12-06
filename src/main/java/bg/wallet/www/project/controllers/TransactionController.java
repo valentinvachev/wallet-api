@@ -35,8 +35,7 @@ public class TransactionController {
 
         Map<String,String> bodyResponse = new HashMap<>();
 
-        //TODO add real user email from token
-        bodyResponse.put("created",String.valueOf(this.transactionService.save(transactionBindingModel,"admin@abv.bg")));
+        bodyResponse.put("created",String.valueOf(this.transactionService.save(transactionBindingModel,request.getUserPrincipal().getName())));
 
 
         return ResponseEntity.created(new URI(request.getServletPath())).body(bodyResponse);

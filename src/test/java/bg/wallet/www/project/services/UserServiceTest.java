@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 public class UserServiceTest {
 
@@ -46,16 +47,16 @@ public class UserServiceTest {
                 .setEmail(TEST_USER1_EMAIL)
                 .setPassword(TEST_USER1_PASS);
 
-        this.userRepository = Mockito.mock(UserRepository.class);
-        this.passwordEncoder = Mockito.mock(PasswordEncoder.class);
-        this.roleService = Mockito.mock(RoleService.class);
+        this.userRepository = mock(UserRepository.class);
+        this.passwordEncoder = mock(PasswordEncoder.class);
+        this.roleService = mock(RoleService.class);
         this.modelMapper = new ModelMapper();
 
     }
 
     @Test
     public void userServiceFindUserByEmail() {
-        Mockito.when(this.userRepository.findUserByEmail(TEST_USER1_EMAIL))
+        when(this.userRepository.findUserByEmail(TEST_USER1_EMAIL))
                 .thenReturn(this.testUser);
 
         UserService userService = new UserServiceImpl(this.userRepository,this.passwordEncoder,this.roleService,this.modelMapper);
@@ -69,7 +70,7 @@ public class UserServiceTest {
 
     @Test
     public void userServiceFindUserEmailInvalid() {
-        Mockito.when(this.userRepository.findUserByEmail(TEST_USER1_EMAIL))
+        when(this.userRepository.findUserByEmail(TEST_USER1_EMAIL))
                 .thenReturn(this.testUser);
 
         UserService userService = new UserServiceImpl(this.userRepository,this.passwordEncoder,this.roleService,this.modelMapper);
@@ -81,7 +82,7 @@ public class UserServiceTest {
 
     @Test
     public void userServiceFindUserInfoByEmailInvalidThrows() {
-        Mockito.when(this.userRepository.findUserByEmail(TEST_USER1_EMAIL))
+        when(this.userRepository.findUserByEmail(TEST_USER1_EMAIL))
                 .thenReturn(null);
 
         UserService userService = new UserServiceImpl(this.userRepository,this.passwordEncoder,this.roleService,this.modelMapper);
@@ -97,7 +98,7 @@ public class UserServiceTest {
 
     @Test
     public void userServiceFindUserInfoByEmailValid() throws EntityNotFoundException {
-        Mockito.when(this.userRepository.findUserByEmail(TEST_USER1_EMAIL))
+        when(this.userRepository.findUserByEmail(TEST_USER1_EMAIL))
                 .thenReturn(this.testUser);
 
         UserService userService = new UserServiceImpl(this.userRepository,this.passwordEncoder,this.roleService,this.modelMapper);
@@ -109,7 +110,7 @@ public class UserServiceTest {
 
     @Test
     public void userServiceFinalAllUsers() {
-        Mockito.when(this.userRepository.findAll())
+        when(this.userRepository.findAll())
                 .thenReturn(List.of(this.testUser));
 
         UserService userService = new UserServiceImpl(this.userRepository,this.passwordEncoder,this.roleService,this.modelMapper);
@@ -121,7 +122,7 @@ public class UserServiceTest {
 
     @Test
     public void userServiceFinalAllUsersCorrectEmail() {
-        Mockito.when(this.userRepository.findAll())
+        when(this.userRepository.findAll())
                 .thenReturn(List.of(this.testUser));
 
         UserService userService = new UserServiceImpl(this.userRepository,this.passwordEncoder,this.roleService,this.modelMapper);
@@ -129,5 +130,90 @@ public class UserServiceTest {
         List<UserViewInfoModel> actual = userService.findAllUsers();
 
         assertEquals(this.testUser.getEmail(),actual.get(0).getEmail());
+    }
+
+    @Test
+    public void userServiceChangeRolesValidNotAdmin() throws EntityNotFoundException {
+
+        User user = new User();
+        Set<Role> roles = new HashSet<>();
+
+        Role r = new Role(UserRole.ADMIN);
+        roles.add(r);
+
+        user.setAuthorities(roles);
+        user.setUsername(TEST_USER1_USERNAME)
+                .setEmail(TEST_USER1_EMAIL)
+                .setPassword(TEST_USER1_PASS)
+                .setId(1L);
+
+        when(this.userRepository.getById(1L))
+                .thenReturn(user);
+
+
+        UserService userService = new UserServiceImpl(this.userRepository,this.passwordEncoder,this.roleService,this.modelMapper);
+
+        userService.changeUserRoles(1L,false);
+
+        assertEquals(0,user.getAuthorities().size());
+    }
+
+    @Test
+    public void userServiceChangeRolesInvalidUser()  {
+
+        User user = new User();
+        Set<Role> roles = new HashSet<>();
+
+        Role r = new Role(UserRole.ADMIN);
+        roles.add(r);
+
+        user.setAuthorities(roles);
+        user.setUsername(TEST_USER1_USERNAME)
+                .setEmail(TEST_USER1_EMAIL)
+                .setPassword(TEST_USER1_PASS)
+                .setId(1L);
+
+        when(this.userRepository.getById(1L))
+                .thenReturn(null);
+
+
+        UserService userService = new UserServiceImpl(this.userRepository,this.passwordEncoder,this.roleService,this.modelMapper);
+
+
+
+        EntityNotFoundException thrown = assertThrows(
+                EntityNotFoundException.class,
+                () ->   userService.changeUserRoles(1L,false)
+        );
+
+        assertTrue(thrown.getMessage().contains("User does not exist"));
+        assertEquals(thrown.getClass(),EntityNotFoundException.class);
+    }
+
+    @Test
+    public void userServiceChangeRolesValidAdmin() throws EntityNotFoundException {
+
+        User user = new User();
+        Set<Role> roles = new HashSet<>();
+
+        Role r = new Role(UserRole.USER);
+        roles.add(r);
+
+        user.setAuthorities(roles);
+        user.setUsername(TEST_USER1_USERNAME)
+                .setEmail(TEST_USER1_EMAIL)
+                .setPassword(TEST_USER1_PASS)
+                .setId(1L);
+
+        when(this.userRepository.getById(1L))
+                .thenReturn(user);
+
+        when((this.roleService.findByAuthority(UserRole.ADMIN))).thenReturn(new Role(UserRole.ADMIN));
+
+        UserService userService = new UserServiceImpl(this.userRepository,this.passwordEncoder,this.roleService,this.modelMapper);
+
+        userService.changeUserRoles(1L,true);
+
+        assertEquals(2,user.getAuthorities().size());
     }
 }
