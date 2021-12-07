@@ -37,24 +37,49 @@ public class UserServiceImpl implements UserService {
         this.modelMapper = modelMapper;
     }
 
+    public void save(UserRegisterBindingModel userRegisterBindingModel) throws DuplicateEntityException {
+        User userDb = this.findByEmail(userRegisterBindingModel.getEmail());
 
+        if (userDb != null) {
+            throw new DuplicateEntityException("User with such email already exists");
+        }
+
+        Set<Role> roles = new HashSet<>();
+
+        if (this.userRepository.count() == 0) {
+            Role roleAdmin = this.roleService.create(UserRole.ADMIN);
+            Role roleUser = this.roleService.create(UserRole.USER);
+
+            roles.add(roleAdmin);
+            roles.add(roleUser);
+        } else {
+            Role roleUser = this.roleService.findByAuthority(UserRole.USER);
+            roles.add(roleUser);
+        }
+
+        UserServiceModel userServiceModel = this.modelMapper.map(userRegisterBindingModel,UserServiceModel.class);
+        User user = this.modelMapper.map(userServiceModel,User.class);
+
+        user.setPassword(this.passwordEncoder.encode(user.getPassword()));
+        user.setAuthorities(roles);
+
+        this.userRepository.save(user);
+    }
 
     @Override
     public List<UserViewInfoModel> findAllUsers() {
         List<User> usersDb = this.userRepository.findAll();
 
-        List<UserViewInfoModel> result =  usersDb.stream().map(u->{
+        return usersDb.stream().map(u->{
             UserViewInfoModel userViewInfoModel = this.modelMapper.map(u,UserViewInfoModel.class);
             userViewInfoModel.setRoles(u.getAuthorities().stream().map(a->a.getAuthority().toString()).collect(Collectors.toSet()));
             return userViewInfoModel;
         }).collect(Collectors.toList());
-
-        return result;
     }
 
     @Override
     public void changeUserRoles(Long id,Boolean isAdmin) throws EntityNotFoundException {
-        User userDb = this.userRepository.getById(id);
+        User userDb = this.userRepository.getUserById(id);
 
         if (userDb == null) {
             throw new EntityNotFoundException("User does not exist");
@@ -79,36 +104,6 @@ public class UserServiceImpl implements UserService {
             userDb.setAuthorities(newAuthorities);
         }
         this.userRepository.save(userDb);
-    }
-
-    public void save(UserRegisterBindingModel userRegisterBindingModel) throws DuplicateEntityException {
-        User userDb = this.findByEmail(userRegisterBindingModel.getEmail());
-
-        if (userDb != null) {
-            throw new DuplicateEntityException("User with such email already exists");
-        }
-
-        Set<Role> roles = new HashSet<>();
-
-        if (this.userRepository.count() == 0) {
-            Role roleAdmin = this.roleService.create(UserRole.ADMIN);
-            Role roleUser = this.roleService.create(UserRole.USER);
-
-            roles.add(roleAdmin);
-            roles.add(roleUser);
-        } else {
-            Role roleUser = this.roleService.findByAuthority(UserRole.USER);
-            roles.add(roleUser);
-       }
-
-
-        UserServiceModel userServiceModel = this.modelMapper.map(userRegisterBindingModel,UserServiceModel.class);
-        User user = this.modelMapper.map(userServiceModel,User.class);
-
-        user.setPassword(this.passwordEncoder.encode(user.getPassword()));
-        user.setAuthorities(roles);
-
-        this.userRepository.save(user);
     }
 
     @Override

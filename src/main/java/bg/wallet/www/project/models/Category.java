@@ -14,6 +14,17 @@ public class Category extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TransactionType type;
+    @ManyToOne
+    private User user;
+
+    public User getUser() {
+        return user;
+    }
+
+    public Category setUser(User user) {
+        this.user = user;
+        return this;
+    }
 
     public TransactionType getType() {
         return type;

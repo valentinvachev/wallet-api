@@ -67,7 +67,7 @@ public class WalletControllerTest {
         user.setAuthorities(roles)
                 .setEmail("test@abv.bg")
                 .setUsername("admin")
-                .setPassword("pass");
+                .setPassword("password123");
 
         this.userRepository.save(user);
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();

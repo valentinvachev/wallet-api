@@ -7,10 +7,8 @@ import bg.wallet.www.project.models.User;
 import bg.wallet.www.project.models.view.UserViewInfoModel;
 import bg.wallet.www.project.repositories.UserRepository;
 import bg.wallet.www.project.services.impl.UserServiceImpl;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -147,7 +145,7 @@ public class UserServiceTest {
                 .setPassword(TEST_USER1_PASS)
                 .setId(1L);
 
-        when(this.userRepository.getById(1L))
+        when(this.userRepository.getUserById(1L))
                 .thenReturn(user);
 
 
@@ -173,7 +171,7 @@ public class UserServiceTest {
                 .setPassword(TEST_USER1_PASS)
                 .setId(1L);
 
-        when(this.userRepository.getById(1L))
+        when(this.userRepository.getUserById(1L))
                 .thenReturn(null);
 
 
@@ -205,7 +203,7 @@ public class UserServiceTest {
                 .setPassword(TEST_USER1_PASS)
                 .setId(1L);
 
-        when(this.userRepository.getById(1L))
+        when(this.userRepository.getUserById(1L))
                 .thenReturn(user);
 
         when((this.roleService.findByAuthority(UserRole.ADMIN))).thenReturn(new Role(UserRole.ADMIN));

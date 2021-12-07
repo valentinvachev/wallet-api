@@ -14,6 +14,8 @@ public class Event extends BaseEntity {
     private LocalDate startDate;
     @Column(name = "end_date")
     private LocalDate endDate;
+    @ManyToOne
+    private User user;
 
     public String getName() {
         return name;
@@ -26,6 +28,15 @@ public class Event extends BaseEntity {
 
     public LocalDate getStartDate() {
         return startDate;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public Event setUser(User user) {
+        this.user = user;
+        return this;
     }
 
     public Event setStartDate(LocalDate startDate) {

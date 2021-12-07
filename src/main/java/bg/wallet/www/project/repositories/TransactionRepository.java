@@ -10,7 +10,9 @@ import java.util.List;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction,Long> {
+    List<Transaction> findAllByCategoryId(Long categoryId);
+    List<Transaction> findAllByWalletId(Long walletId);
     List<Transaction> findTop5ByUser_IdOrderByCreatedAtDesc(Long userId);
     List<Transaction> findAllByWallet_IdOrderByCreatedAtDesc(Long walletId);
-    List<Transaction> findTransactionByWallet_IdAndCreatedAtGreaterThanEqualAndCreatedAtLessThanEqualOrderByCreatedAtDesc(Long id, LocalDateTime startDate, LocalDateTime endDate);
+    List<Transaction> findTransactionByWallet_IdAndCreatedAtGreaterThanEqualAndCreatedAtLessThanEqualOrderByCreatedAtDesc(Long walletId, LocalDateTime startDate, LocalDateTime endDate);
 }

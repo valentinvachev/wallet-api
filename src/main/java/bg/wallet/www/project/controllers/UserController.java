@@ -13,7 +13,6 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -55,22 +54,21 @@ public class UserController {
     }
 
     @GetMapping("")
-    public ResponseEntity<?> getUsers(HttpServletRequest request) throws URISyntaxException, DuplicateEntityException {
+    public ResponseEntity<?> getUsers(){
             return ResponseEntity.ok().body(this.userService.findAllUsers());
     }
 
     @GetMapping("/info")
-    public ResponseEntity<?> getUserInfo(HttpServletRequest request) throws URISyntaxException, DuplicateEntityException, EntityNotFoundException {
-
+    public ResponseEntity<?> getUserInfo(HttpServletRequest request) throws EntityNotFoundException {
             return ResponseEntity.ok().body(this.userService.findUserInfoByEmail(request.getUserPrincipal().getName()));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<?> updateUser(HttpServletRequest request, @PathVariable Long id, @RequestParam(required = false) String admin) throws EntityNotFoundException {
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestParam(required = false) String admin) throws EntityNotFoundException {
 
         Map<String,Long> bodyResponse = new HashMap<>();
 
-        if (admin.equals("true")) {
+        if ("true".equals(admin)) {
              this.userService.changeUserRoles(id,true);
         } else {
             this.userService.changeUserRoles(id,false);

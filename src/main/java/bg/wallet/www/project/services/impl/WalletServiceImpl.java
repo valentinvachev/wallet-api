@@ -4,6 +4,8 @@ import bg.wallet.www.project.enums.TransactionType;
 import bg.wallet.www.project.exceptions.DuplicateEntityException;
 import bg.wallet.www.project.exceptions.EntityNotFoundException;
 import bg.wallet.www.project.exceptions.InvalidInputException;
+import bg.wallet.www.project.exceptions.NotAuthorizedException;
+import bg.wallet.www.project.models.Category;
 import bg.wallet.www.project.models.User;
 import bg.wallet.www.project.models.Wallet;
 import bg.wallet.www.project.models.binding.WalletBindingModel;
@@ -45,12 +47,13 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public Long save(WalletBindingModel walletBindingModel,String userEmail) throws DuplicateEntityException, InvalidInputException {
-        Wallet walletDb = this.walletRepository.findByName(walletBindingModel.getName());
         User user = this.userService.findByEmail(userEmail);
 
         if (user == null) {
             throw new InvalidInputException("User does not exist");
         }
+
+        Wallet walletDb = this.walletRepository.findByNameAndUserEmail(walletBindingModel.getName(),userEmail);
 
         if (walletDb == null) {
             WalletServiceModel walletServiceModel = this.modelMapper.map(walletBindingModel, WalletServiceModel.class);
@@ -65,7 +68,7 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public void editBalance(Long walletId, BigDecimal amount, TransactionType type) {
-        Wallet wallet = this.walletRepository.getById(walletId);
+        Wallet wallet = this.walletRepository.getWalletById(walletId);
 
         if (wallet != null) {
             BigDecimal currentBalance = wallet.getBalance();
@@ -81,42 +84,62 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public Long editName(Long id, WalletEditBindingModel walletEditBindingModel, String userEmail) throws InvalidInputException, EntityNotFoundException {
-        Wallet walletDb = this.walletRepository.getById(id);
+    public Long editName(Long id, WalletEditBindingModel walletEditBindingModel, String userEmail) throws InvalidInputException, EntityNotFoundException, NotAuthorizedException {
         User user = this.userService.findByEmail(userEmail);
 
         if (user == null) {
             throw new InvalidInputException("User does not exist");
         }
 
+        Wallet walletDb = this.walletRepository.getWalletById(id);
+
         if (walletDb != null) {
+            if (!walletDb.getUser().getId().equals(user.getId())) {
+                throw new NotAuthorizedException("User not authorized");
+            }
+
             walletDb.setName(walletEditBindingModel.getName());
             this.walletRepository.save(walletDb);
             return walletDb.getId();
         } else {
-            throw new EntityNotFoundException("Wallet with this name does not exists");
+            throw new EntityNotFoundException("Wallet with this id does not exists");
         }
     }
 
     @Override
-    public List<WalletActiveViewModel> findAll() {
-        return this.walletRepository.findAll().stream()
+    public BigDecimal findTotal(String userEmail) {
+        BigDecimal total = this.walletRepository.findSumOfAllWallets(userEmail);
+
+        if (total == null) {
+            total = BigDecimal.valueOf(0);
+        }
+
+        return total;
+    }
+
+    @Override
+    public List<WalletActiveViewModel> findAll(String userEmail) {
+        return this.walletRepository.findAllByUserEmail(userEmail).stream()
                 .map(w->this.modelMapper.map(w,WalletActiveViewModel.class))
                 .collect(Collectors.toList());
     }
 
     @Override
     public Wallet findById(Long id) {
-        return this.walletRepository.getById(id);
+        return this.walletRepository.getWalletById(id);
     }
 
     @Override
-    public WalletDetailsViewModel getWalletById(Long id) throws EntityNotFoundException {
+    public WalletDetailsViewModel getWalletById(Long id,String userEmail) throws EntityNotFoundException, NotAuthorizedException {
 
-        Wallet wallet = this.walletRepository.getById(id);
+        Wallet wallet = this.walletRepository.getWalletById(id);
 
         if (wallet == null) {
             throw new EntityNotFoundException("Wallet with this id does not exists");
+        }
+
+        if (!wallet.getUser().getEmail().equals(userEmail)) {
+            throw new NotAuthorizedException("User not authorized");
         }
 
         WalletDetailsViewModel walletDetailsViewModel = this.modelMapper.map(wallet,WalletDetailsViewModel.class);
@@ -132,11 +155,15 @@ public class WalletServiceImpl implements WalletService {
 
 
     @Override
-    public WalletDetailsReportViewModel getWalletReportById(Long id, LocalDateTime startDate, LocalDateTime endDate) throws InvalidInputException, EntityNotFoundException {
-        Wallet wallet = this.walletRepository.getById(id);
+    public WalletDetailsReportViewModel getWalletReportById(Long id, LocalDateTime startDate, LocalDateTime endDate,String userEmail) throws InvalidInputException, EntityNotFoundException, NotAuthorizedException {
+        Wallet wallet = this.walletRepository.getWalletById(id);
 
         if (wallet == null) {
             throw new EntityNotFoundException("Wallet with this id does not exists");
+        }
+
+        if (!wallet.getUser().getEmail().equals(userEmail)) {
+            throw new NotAuthorizedException("User not authorized");
         }
 
         if (startDate.isAfter(endDate)) {
@@ -167,7 +194,20 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public BigDecimal findTotal() {
-        return this.walletRepository.findSumOfAllWallets();
+    public void deleteWallet(Long id, String userEmail) throws NotAuthorizedException, EntityNotFoundException {
+        Wallet walletDb = this.walletRepository.getWalletById(id);
+
+        if (walletDb != null) {
+
+            if (!walletDb.getUser().getEmail().equals(userEmail)) {
+                throw new NotAuthorizedException("User not authorized");
+            }
+
+            this.transactionService.deleteTransactionsByWalletId(walletDb.getId());
+            this.walletRepository.delete(walletDb);
+
+        } else {
+            throw new EntityNotFoundException("Wallet does not exists");
+        }
     }
 }

@@ -28,6 +28,11 @@ public class GlobalHandler {
         return error(HttpStatus.CONFLICT, request.getServletPath(), ex.getMessage());
     }
 
+    @ExceptionHandler(NotAuthorizedException.class)
+    public ResponseEntity<?> authorization(NotAuthorizedException ex, HttpServletRequest request) {
+        return error(HttpStatus.UNAUTHORIZED, request.getServletPath(), ex.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> methodArgumentNotValidException(MethodArgumentNotValidException ex,HttpServletRequest request) {
         BindingResult result = ex.getBindingResult();

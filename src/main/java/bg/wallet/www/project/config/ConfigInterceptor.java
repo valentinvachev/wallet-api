@@ -13,9 +13,7 @@ public class ConfigInterceptor implements WebMvcConfigurer {
     private final LoggingInterceptor myInterceptor;
 
     public ConfigInterceptor(LoggingInterceptor myInterceptor) {
-
         this.myInterceptor = myInterceptor;
-
     }
 
     @Override

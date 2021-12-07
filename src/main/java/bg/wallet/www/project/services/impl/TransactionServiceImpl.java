@@ -44,14 +44,18 @@ public class TransactionServiceImpl implements TransactionService {
 
         User user = this.userService.findByEmail(userEmail);
         Category category = this.categoryService.findById(transactionBindingModel.getCategory());
-        Event event = this.eventService.findById(transactionBindingModel.getEvent());
+        Event event = null;
         Wallet wallet = this.walletService.findById(transactionBindingModel.getWallet());
+
+        if (transactionBindingModel.getEvent() != null) {
+            event = this.eventService.findById(transactionBindingModel.getEvent());
+        }
 
         if (user == null) {
             throw new InvalidInputException("User does not exist");
         } else if (category == null) {
             throw new InvalidInputException("Category does not exist");
-        } else if (event == null) {
+        } else if (transactionBindingModel.getEvent() != null && event == null) {
             throw new InvalidInputException("Event does not exist");
         } else if (wallet == null) {
             throw new InvalidInputException("Wallet does not exist");
@@ -99,5 +103,17 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public List<Transaction> findAllTransactionsBetweenDatesByWallet(Long walletId, LocalDateTime startDate, LocalDateTime endDate) {
         return this.transactionRepository.findTransactionByWallet_IdAndCreatedAtGreaterThanEqualAndCreatedAtLessThanEqualOrderByCreatedAtDesc(walletId,startDate,endDate);
+    }
+
+    @Override
+    public void deleteTransactionsByCategoryId(Long categoryId) {
+        List<Transaction> transactionsDb = this.transactionRepository.findAllByCategoryId(categoryId);
+        this.transactionRepository.deleteAll(transactionsDb);
+    }
+
+    @Override
+    public void deleteTransactionsByWalletId(Long walletId) {
+            List<Transaction> transactionsDb = this.transactionRepository.findAllByWalletId(walletId);
+            this.transactionRepository.deleteAll(transactionsDb);
     }
 }

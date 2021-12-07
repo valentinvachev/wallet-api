@@ -25,7 +25,7 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 public class CustomAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String[] urls = new String[]{"/login","/api/users/token/refreshToken","/api/users/register"};
+        String[] urls = new String[]{"/login","/api/users/token/refreshToken","/api/users/register","/api/quotes"};
 
         if (Arrays.stream(urls).anyMatch(u->u.equals(request.getServletPath()))) {
             filterChain.doFilter(request,response);

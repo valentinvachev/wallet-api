@@ -1,8 +1,11 @@
 package bg.wallet.www.project.web;
 import bg.wallet.www.project.models.Event;
+import bg.wallet.www.project.models.User;
 import bg.wallet.www.project.models.binding.EventsBindingModel;
 import bg.wallet.www.project.repositories.EventRepository;
+import bg.wallet.www.project.repositories.RoleRepository;
 import bg.wallet.www.project.repositories.TransactionRepository;
+import bg.wallet.www.project.repositories.UserRepository;
 import bg.wallet.www.project.services.EventService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,9 +15,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+
 import static bg.wallet.www.project.web.Utils.asJsonString;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -34,6 +42,10 @@ public class EventControllerTest {
     EventRepository eventRepository;
     @Autowired
     TransactionRepository transactionRepository;
+    @Autowired
+    RoleRepository roleRepository;
+    @Autowired
+    UserRepository userRepository;
 
     @BeforeEach
     public void cleanUp() {
@@ -93,16 +105,18 @@ public class EventControllerTest {
     @Test
     @WithMockUser(username = "test@abv.bg",roles = {"USER","ADMIN"})
     public void getAllActiveEventsSize1() throws Exception {
+        Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ADMIN"));
+        authorities.add(new SimpleGrantedAuthority("USER"));
 
-        Event event = new Event();
-        event.setName("TEST EVENT2")
-                .setStartDate(LocalDate.now())
-                .setEndDate(LocalDate.now().plusDays(2));
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken("test@abv.bg",null,authorities);
 
-        this.eventRepository.save(event);
 
-        this.mockMvc.perform(get("/api/events"))
+        this.mockMvc.perform(get("/api/events")
+                .param("active","true")
+                .principal(authenticationToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)));
+                .andExpect(jsonPath("$", hasSize(0)));
     }
 }

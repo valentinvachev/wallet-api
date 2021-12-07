@@ -2,6 +2,7 @@ package bg.wallet.www.project.controllers;
 import bg.wallet.www.project.exceptions.DuplicateEntityException;
 import bg.wallet.www.project.exceptions.EntityNotFoundException;
 import bg.wallet.www.project.exceptions.InvalidInputException;
+import bg.wallet.www.project.exceptions.NotAuthorizedException;
 import bg.wallet.www.project.models.binding.CategoryBindingModel;
 import bg.wallet.www.project.models.binding.WalletBindingModel;
 import bg.wallet.www.project.models.binding.WalletEditBindingModel;
@@ -32,9 +33,8 @@ public class WalletController {
     @PostMapping("")
     public ResponseEntity<?> createWallet(HttpServletRequest request, @Valid @RequestBody WalletBindingModel walletBindingModel) throws URISyntaxException, DuplicateEntityException, InvalidInputException {
 
-        Map<String,String> bodyResponse = new HashMap<>();
-
         String userEmail = request.getUserPrincipal().getName();
+        Map<String,String> bodyResponse = new HashMap<>();
 
         bodyResponse.put("created",String.valueOf(this.walletService.save(walletBindingModel,userEmail)));
         bodyResponse.put("user",userEmail);
@@ -43,13 +43,12 @@ public class WalletController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<?> editWallet(HttpServletRequest request, @PathVariable Long id, @Valid @RequestBody WalletEditBindingModel walletEditBindingModel) throws InvalidInputException, EntityNotFoundException {
+    public ResponseEntity<?> editWallet(HttpServletRequest request, @PathVariable Long id, @Valid @RequestBody WalletEditBindingModel walletEditBindingModel) throws InvalidInputException, EntityNotFoundException, NotAuthorizedException {
 
+        String userEmail = request.getUserPrincipal().getName();
         Map<String,String> bodyResponse = new HashMap<>();
 
-        //TODO if user that edits owns the wallet
-
-        bodyResponse.put("edited",String.valueOf(this.walletService.editName(id,walletEditBindingModel,"admin@abv.bg")));
+        bodyResponse.put("edited",String.valueOf(this.walletService.editName(id,walletEditBindingModel,userEmail)));
 
         return ResponseEntity.ok().body(bodyResponse);
     }
@@ -57,18 +56,18 @@ public class WalletController {
     @GetMapping("")
     public ResponseEntity<?> getWallets(HttpServletRequest request, @RequestParam(required = false) String total) {
 
+        String userEmail = request.getUserPrincipal().getName();
+
         if (("true").equals(total)) {
-            return ResponseEntity.ok().body(this.walletService.findTotal());
+            return ResponseEntity.ok().body(this.walletService.findTotal(userEmail));
         }
 
-        int a = 1;
-        return ResponseEntity.ok().body(this.walletService.findAll());
+        return ResponseEntity.ok().body(this.walletService.findAll(userEmail));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getWallet(HttpServletRequest request, @PathVariable Long id, @RequestParam(required = false) String startDate, @RequestParam(required = false) String endDate) throws EntityNotFoundException, InvalidInputException {
-
-        int a = 1;
+    public ResponseEntity<?> getWallet(HttpServletRequest request, @PathVariable Long id, @RequestParam(required = false) String startDate, @RequestParam(required = false) String endDate) throws EntityNotFoundException, InvalidInputException, NotAuthorizedException {
+        String userEmail = request.getUserPrincipal().getName();
 
         if (startDate != null && endDate != null) {
             ZonedDateTime zdtStart = ZonedDateTime.parse(startDate);
@@ -77,9 +76,22 @@ public class WalletController {
             ZonedDateTime zdtEnd = ZonedDateTime.parse(endDate);
             LocalDateTime ldtEnd = zdtEnd.toLocalDateTime().with(LocalTime.of(23,59));
 
-            return ResponseEntity.ok().body(this.walletService.getWalletReportById(id,ldtStart,ldtEnd));
+            return ResponseEntity.ok().body(this.walletService.getWalletReportById(id,ldtStart,ldtEnd,userEmail));
         }
 
-        return ResponseEntity.ok().body(this.walletService.getWalletById(id));
+        return ResponseEntity.ok().body(this.walletService.getWalletById(id,userEmail));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteWallet(HttpServletRequest request, @PathVariable Long id) throws EntityNotFoundException, NotAuthorizedException {
+
+        String userEmail = request.getUserPrincipal().getName();
+        Map<String,String> bodyResponse = new HashMap<>();
+
+        this.walletService.deleteWallet(id,userEmail);
+
+        bodyResponse.put("deleted",String.valueOf(id));
+
+        return ResponseEntity.ok().body(bodyResponse);
     }
 }

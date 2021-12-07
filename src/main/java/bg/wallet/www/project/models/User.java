@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 public class User extends BaseEntity {
 
     @Column(nullable = false)
+    @Size(min = 6)
     private String password;
     @Column(unique = true,nullable = false)
     @Email

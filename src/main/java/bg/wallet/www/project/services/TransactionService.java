@@ -11,6 +11,8 @@ import java.util.List;
 
 public interface TransactionService {
     Long save(TransactionBindingModel transactionBindingModel,String userEmail) throws InvalidInputException;
+    void deleteTransactionsByCategoryId(Long categoryId);
+    void deleteTransactionsByWalletId(Long walletId);
     List<TransactionLastViewModel> findLastFiveTransactionsOfUser(String userEmail);
     List<Transaction> findAllTransactionsByWallet(Long walletId);
     List<Transaction> findAllTransactionsBetweenDatesByWallet(Long walletId, LocalDateTime startDate, LocalDateTime endDate);

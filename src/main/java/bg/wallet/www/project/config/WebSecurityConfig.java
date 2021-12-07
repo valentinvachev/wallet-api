@@ -1,11 +1,8 @@
 package bg.wallet.www.project.config;
-
-import bg.wallet.www.project.enums.UserRole;
 import bg.wallet.www.project.filters.CustomAuthenticationFilter;
 import bg.wallet.www.project.filters.CustomAuthorizationFilter;
 import bg.wallet.www.project.security.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -51,8 +48,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf().disable();
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.authorizeRequests()
-                .antMatchers("/login","/api/users/token/refreshToken","/api/users/register").permitAll();
+                .antMatchers("/login","/api/users/token/refreshToken","/api/users/register","/api/quotes").permitAll();
         http.authorizeRequests().antMatchers(HttpMethod.PATCH,"/api/users/**").hasAnyAuthority("ADMIN");
+        http.authorizeRequests().antMatchers(HttpMethod.GET,"/api/users").hasAnyAuthority("ADMIN");
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(new CustomAuthenticationFilter(authenticationManagerBean()));
         http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);

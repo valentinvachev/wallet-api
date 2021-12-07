@@ -28,21 +28,22 @@ public class EventController {
 
     @PostMapping("")
     public ResponseEntity<?> createEvent(HttpServletRequest request, @Valid @RequestBody EventsBindingModel eventsBindingModel) throws URISyntaxException, InvalidInputException, DuplicateEntityException {
+        String userEmail = request.getUserPrincipal().getName();
         Map<String,String> bodyResponse = new HashMap<>();
 
-        bodyResponse.put("created",String.valueOf(this.eventService.save(eventsBindingModel)));
+        bodyResponse.put("created",String.valueOf(this.eventService.save(eventsBindingModel,userEmail)));
 
         return ResponseEntity.created(new URI(request.getServletPath())).body(bodyResponse);
     }
 
     @GetMapping("")
     public ResponseEntity<?> getEvents(HttpServletRequest request, @RequestParam(required = false) String active){
-        Map<String,String> bodyResponse = new HashMap<>();
+        String userEmail = request.getUserPrincipal().getName();
 
         if ("true".equals(active)) {
-            return ResponseEntity.ok().body(this.eventService.findActiveEvents());
+            return ResponseEntity.ok().body(this.eventService.findActiveEvents(userEmail));
         }
 
-        return ResponseEntity.ok().body(this.eventService.findAll());
+        return ResponseEntity.ok().body(this.eventService.findAll(userEmail));
     }
 }
