@@ -1,8 +1,8 @@
 package bg.wallet.www.project.controllers;
 
+import bg.wallet.www.project.events.RegisterUserEventPublisher;
 import bg.wallet.www.project.exceptions.DuplicateEntityException;
 import bg.wallet.www.project.exceptions.EntityNotFoundException;
-import bg.wallet.www.project.models.Role;
 import bg.wallet.www.project.models.User;
 import bg.wallet.www.project.models.binding.UserRegisterBindingModel;
 import bg.wallet.www.project.services.UserService;
@@ -22,6 +22,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,10 +35,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class UserController {
 
     private UserService userService;
+    private RegisterUserEventPublisher publisher;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService,RegisterUserEventPublisher publisher) {
         this.userService = userService;
+        this.publisher = publisher;
     }
 
     @PostMapping("/register")
@@ -49,6 +52,8 @@ public class UserController {
         this.userService.save(userRegisterBindingModel);
 
         bodyResponse.put("created",userRegisterBindingModel.getEmail());
+
+        publisher.publishEvent(userRegisterBindingModel.getEmail(), LocalDateTime.now());
 
         return ResponseEntity.created(new URI(request.getServletPath())).body(bodyResponse);
     }
@@ -81,6 +86,8 @@ public class UserController {
 
     @PostMapping("/token/refreshToken")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+
         String authorizationHeader = request.getHeader(AUTHORIZATION);
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             try {
@@ -92,10 +99,16 @@ public class UserController {
                 User user = this.userService.findByEmail(email);
 
                 String access_token = JWT.create()
-                        .withSubject(user.getUsername())
+                        .withSubject(user.getEmail())
                         .withExpiresAt(new Date(System.currentTimeMillis() + 2 * 60 * 1000))
                         .withIssuer(request.getRequestURL().toString())
-                        .withClaim("roles",user.getAuthorities().stream().map(Role::getAuthority).collect(Collectors.toList()))
+                        .withClaim("roles",user.getAuthorities().stream().map(r->r.getAuthority().name()).collect(Collectors.toList()))
+                        .sign(algorithm);
+
+                refresh_token = JWT.create()
+                        .withSubject(user.getEmail())
+                        .withExpiresAt(new Date(System.currentTimeMillis() + 9999999L * 9999999L * 1000))
+                        .withIssuer(request.getRequestURL().toString())
                         .sign(algorithm);
 
                 Map<String,String> tokens = new HashMap<>();
@@ -111,8 +124,6 @@ public class UserController {
                 response.setHeader("error", ex.getMessage());
                 response.sendError(FORBIDDEN.value(), ex.getMessage());
             }
-        } else {
-            throw new RuntimeException("Refresh token is missing");
         }
     }
 }
